@@ -1,4 +1,4 @@
-# Enhanced RTLS Trajectory Analytics Dashboard
+# RTLS Trajectory Analytics Dashboard
 
 An advanced Streamlit dashboard for Real-Time Location System (RTLS) trajectory analysis with multi-tab interface, SVG plant layout support, and comprehensive KPI tracking.
 

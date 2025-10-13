@@ -1,0 +1,10 @@
+# Virtual environments
+venv/
+env/
+myvenv/
+__env__/
+
+# Environment variables
+.env
+.env.local
+.env.*.local

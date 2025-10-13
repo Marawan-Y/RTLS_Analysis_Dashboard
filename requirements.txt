@@ -4,3 +4,7 @@ numpy==1.26.4
 matplotlib==3.9.0
 python-dotenv==1.0.1
 snowflake-connector-python==3.10.1
+plotly
+svgpath2mpl
+dotenv
+seaborn==0.13.2

@@ -1,210 +1,210 @@
 # RTLS Trajectory Analytics Dashboard
 
-An advanced Streamlit dashboard for Real-Time Location System (RTLS) trajectory analysis with multi-tab interface, SVG plant layout support, and comprehensive KPI tracking.
+An interactive Streamlit dashboard for exploring RTLS (Real-Time Location System) trajectories, computing KPIs, and visualizing paths and heatmaps. You can connect directly to **Snowflake** from inside the app (no coding required), or load a **CSV** sample.
 
-## Key Enhancements
+---
 
-### 1. **Multi-Tab Interface**
-- **Overview Tab**: System-wide metrics and quick summary
-- **KPIs Tab**: Detailed performance indicators with utilization charts
-- **Trajectories Tab**: Vehicle path visualization with optional plant layout overlay
-- **Heatmap Tab**: Position density visualization
-- **Speed Analysis Tab**: Speed distribution and temporal analysis
-- **Export Tab**: Data download functionality with preview
+## What you can do
 
-### 2. **SVG Plant Layout Integration**
-- Upload SVG files of your facility layout
-- Automatic scaling and alignment with trajectory data
-- Transparent overlay for better context
-- Support for common SVG elements (rectangles, circles, paths, etc.)
+- Connect to your **Snowflake** database by typing credentials in the sidebar  
+- Choose which **columns** to load from your Snowflake table/view  
+- Filter by **date** and **row limit** before loading  
+- Upload **CSV** data instead of Snowflake (optional)  
+- View **trajectories**, **heatmaps**, **speed analysis**, and **KPI tables**  
+- Export processed data and KPIs as **CSV**  
+- (Optional) Overlay an **SVG** plant layout behind the trajectories
 
-### 3. **Enhanced Snowflake Integration**
-- Direct connection to existing Snowflake tables
-- Proper handling of the exact table structure from your MQTT/RTLS data
-- Date filtering capabilities
-- Row limit controls for performance
+---
 
-## Prerequisites
+## 1) Quick start (the shortest path)
 
-- Python 3.8+
-- Snowflake account with RTLS data tables
-- SVG file of plant layout (optional)
+> Works on Windows, macOS, and Linux.
 
-## Installation
+1. **Install Python 3.10+**  
+   - Windows: [python.org/downloads](https://www.python.org/downloads/) – check “Add python.exe to PATH” during install  
+   - macOS (Homebrew):  
+     ```bash
+     brew install python
+     ```
+   - Linux (Debian/Ubuntu):  
+     ```bash
+     sudo apt-get update && sudo apt-get install -y python3 python3-venv python3-pip
+     ```
 
-1. **Clone or download the repository**
+2. **Download the project** (ZIP) or clone:
+   ```bash
+   git clone https://github.com/Marawan-Y/RTLS_Analysis_Dashboard.git
+   cd RTLS_Analysis_Dashboard
+   ```
 
-2. **Install dependencies**:
-```bash
-pip install -r requirements.txt
-```
+3. **Create a virtual environment** (recommended):
+   - Windows (PowerShell):
+     ```powershell
+     python -m venv venv
+     .\venv\Scripts\Activate
+     ```
+   - macOS/Linux (bash/zsh):
+     ```bash
+     python3 -m venv venv
+     source venv/bin/activate
+     ```
 
-3. **Configure Snowflake connection**:
-```bash
-cp .env.example .env
-# Edit .env with your Snowflake credentials
-```
+4. **Install dependencies**:
+   ```bash
+   pip install --upgrade pip
+   pip install -r requirements.txt
+   ```
 
-4. **Prepare your SVG layout** (optional):
-   - Export your plant layout as SVG from CAD software
-   - Ensure coordinates align with your RTLS coordinate system
+5. **Run the app**:
+   ```bash
+   streamlit run streamlit_app.py --server.port=5000 --server.address=127.0.0.1
+   ```
+   Streamlit will open in your browser (usually at http://localhost:5000).
 
-## Configuration
+---
 
-### Environment Variables (.env file)
+## 2) Using the app
+
+### A) Connect to Snowflake (no coding)
+
+1. In the **left sidebar**, pick **“Snowflake”** as data source.  
+2. Fill in your Snowflake details:
+   - **Account**: e.g. `ab12345.eu-central-1`
+   - **User** / **Password**
+   - **Role**: e.g. `SYSADMIN`
+   - **Warehouse**: e.g. `COMPUTE_WH`
+   - **Database**: e.g. `IOT`
+   - **Schema**: e.g. `PUBLIC`
+   - **Table or View**: e.g. `RTLS_STAGING` or `RTLS_POSITIONS_V`
+3. Click **🔌 Connect & Load Columns**.  
+   - You should see a success message and a list of available columns.
+4. Choose which columns you want to load.  
+   - The app will **automatically ensure** the required ones are included:
+     - `PAYLOAD_SERIALNUMBER`, `PAYLOAD_TIMESTAMP`, `PAYLOAD_AGVPOSITION_X`, `PAYLOAD_AGVPOSITION_Y`
+5. (Optional) Add **filters**:
+   - **Row limit** (0 = all)
+   - **Date filter** (exact date)
+6. Click **Run Analysis**.
+
+> 🔐 **Security tip:** The app does **not** save your password. If you share screenshots or recordings, redact credentials.
+
+### B) Load a CSV instead
+
+1. In the sidebar, choose **“CSV Upload”**.  
+2. Upload a file with at least these columns:  
+   - `PAYLOAD_TIMESTAMP`, `PAYLOAD_SERIALNUMBER`, `PAYLOAD_AGVPOSITION_X`, `PAYLOAD_AGVPOSITION_Y`  
+   Optional columns (auto-used if present):  
+   - `PAYLOAD_AGVPOSITION_THETA`, `PAYLOAD_AGVPOSITION_MAPID`, `PAYLOAD_AGVPOSITION_POSITIONINITIALIZED`, `PAYLOAD_AGVPOSITION_LOCALIZATIONSCORE`, `PAYLOAD_VELOCITY_VX`, `PAYLOAD_VELOCITY_VY`, `PAYLOAD_VELOCITY_OMEGA`, `MQTT_TIMESTAMP_ISO_8601`, `MQTT_TOPIC`
+3. Click **Run Analysis**.
+
+---
+
+## 3) Optional: overlay an SVG plant layout
+
+1. In the sidebar, enable **Use plant layout**.  
+2. Upload an **.svg** file of your site layout.  
+3. The app parses and scales the layout to your data bounds and draws it semi-transparent behind the trajectories/heatmaps.
+
+---
+
+## 4) Optional: environment variables (legacy / fallback)
+
+The app is meant for non-developers and doesn’t require a `.env`.  
+If you prefer defaults to pre-fill the sidebar, create a file named `.env` in the project root:
+
 ```env
-SNOWFLAKE_ACCOUNT=your_account.region
-SNOWFLAKE_USER=your_username
+SNOWFLAKE_ACCOUNT=ab12345.eu-central-1
+SNOWFLAKE_USER=your_user
 SNOWFLAKE_PASSWORD=your_password
 SNOWFLAKE_ROLE=SYSADMIN
 SNOWFLAKE_WAREHOUSE=COMPUTE_WH
 SNOWFLAKE_DATABASE=IOT
 SNOWFLAKE_SCHEMA=PUBLIC
-SNOWFLAKE_STAGING_TABLE=RTLS_STAGING
+SNOWFLAKE_TABLE=RTLS_STAGING
 ```
 
-### Expected Table Structure
-
-The dashboard expects data with these columns:
-- `PAYLOAD_TIMESTAMP` - Position timestamp
-- `PAYLOAD_SERIALNUMBER` - Vehicle ID
-- `PAYLOAD_AGVPOSITION_X` - X coordinate
-- `PAYLOAD_AGVPOSITION_Y` - Y coordinate
-- `PAYLOAD_AGVPOSITION_THETA` - Orientation
-- `PAYLOAD_AGVPOSITION_MAPID` - Map identifier
-- `PAYLOAD_AGVPOSITION_LOCALIZATIONSCORE` - Localization quality
-- `PAYLOAD_VELOCITY_VX`, `PAYLOAD_VELOCITY_VY`, `PAYLOAD_VELOCITY_OMEGA` - Velocity components
-
-## Running the Dashboard
-
-### Basic Usage
-```bash
-streamlit run streamlit_app.py
-```
-
-## Features Guide
-
-### 1. Data Source Selection
-- **Snowflake**: Connect directly to your database
-- **CSV Upload**: Analyze exported data files
-
-### 2. Connection Testing
-- Click "Test Connection" to verify Snowflake connectivity
-- View available tables in your schema
-
-### 3. Query Filters
-- **Row Limit**: Control data volume (0 = unlimited)
-- **Date Filter**: Select specific days for analysis
-
-### 4. Layout Integration
-- Check "Use plant layout"
-- Upload your SVG file
-- The layout will automatically scale to match trajectory coordinates
-
-### 5. Analysis Settings
-- **Max Speed Filter**: Remove unrealistic movements (default: 10 m/s)
-- **Dwell Threshold**: Define stationary threshold (default: 0.2 m/s)
-- **Smoothing Window**: Trajectory smoothing parameter
-
-## KPI Calculations
-
-The dashboard calculates:
-- **Total Distance**: Sum of all movements
-- **Average Speed**: Mean velocity when moving
-- **Max/Min Speed**: Speed extremes
-- **Dwell Time**: Time spent below threshold
-- **Utilization %**: Percentage of time in motion
-- **Time Span**: Total observation period
-
-## Visualization Features
-
-### Trajectory Plot
-- Color-coded by vehicle
-- Start (green) and end (red) markers
-- Optional SVG layout background
-- Smoothed paths for clarity
-
-### Heatmap
-- Adjustable resolution (20-100 bins)
-- Density-based coloring
-- Layout overlay support
-
-### Speed Analysis
-- Distribution histogram
-- Time-series plot with smoothing
-- Statistical summaries
-
-## Data Export
-
-Export options include:
-- **Processed Positions**: Cleaned trajectory data with calculated metrics
-- **KPI Summary**: Aggregated performance metrics per vehicle
-
-## Troubleshooting
-
-### Common Issues
-
-1. **Snowflake Connection Failed**
-   - Verify credentials in .env file
-   - Check network/firewall settings
-   - Ensure warehouse is running
-
-2. **SVG Layout Not Displaying**
-   - Check SVG file format (standard SVG 1.1)
-   - Verify coordinate systems match
-   - Try simplifying complex SVG elements
-
-3. **Performance Issues**
-   - Use row limits for large datasets
-   - Apply date filters to reduce data volume
-   - Consider upgrading Snowflake warehouse size
-
-## Advanced Customization
-
-### Modifying SVG Handler
-Edit `svg_layout_handler.py` to:
-- Add support for additional SVG elements
-- Customize rendering styles
-- Implement coordinate transformations
-
-### Adding New KPIs
-In `streamlit_app.py`, modify the `kpi_table()` function:
-```python
-def kpi_table(df):
-    # Add your custom KPI calculations
-    custom_kpi = calculate_custom_metric(df)
-    # Include in results
-```
-
-### Creating Custom Tabs
-Add new tabs in the main interface:
-```python
-tab1, tab2, ..., custom_tab = st.tabs([..., "Custom Analysis"])
-with custom_tab:
-    # Your custom analysis code
-```
-
-## File Structure
-
-```
-project/
-├── streamlit_app.py           # Main dashboard application
-├── svg_layout_handler.py       # SVG parsing and rendering module
-├── .env.example               # Environment variable template
-├── .env                       # Your configuration (git-ignored)
-├── requirements.txt           # Python dependencies
-├── snowflake_setup.sql       # Database setup script
-└── README.md                  # This file
-```
-
-## Support
-
-For issues or questions:
-1. Check the troubleshooting section
-2. Review Snowflake connection logs
-3. Verify data format matches expectations
-4. Test with sample data first
+> These values will appear as **defaults** in the UI. You can still edit them live in the app.
 
 ---
 
-**Note**: Ensure your Snowflake tables are properly populated and the daily KPI task is running for complete functionality.
+## 5) Data model (what the app expects)
+
+Minimum columns:
+- `PAYLOAD_TIMESTAMP` (timestamp)
+- `PAYLOAD_SERIALNUMBER` (vehicle id)
+- `PAYLOAD_AGVPOSITION_X`, `PAYLOAD_AGVPOSITION_Y` (numeric positions)
+
+Useful optional columns:
+- `PAYLOAD_AGVPOSITION_THETA`, `PAYLOAD_AGVPOSITION_MAPID`,
+  `PAYLOAD_AGVPOSITION_POSITIONINITIALIZED`, `PAYLOAD_AGVPOSITION_LOCALIZATIONSCORE`,
+  `PAYLOAD_VELOCITY_VX`, `PAYLOAD_VELOCITY_VY`, `PAYLOAD_VELOCITY_OMEGA`,
+  `MQTT_TIMESTAMP_ISO_8601`, `MQTT_TOPIC`
+
+The app automatically **renames** key Snowflake fields into internal names:
+- `PAYLOAD_SERIALNUMBER → vehicle_id`
+- `PAYLOAD_TIMESTAMP → ts`
+- `PAYLOAD_AGVPOSITION_X → x`, `PAYLOAD_AGVPOSITION_Y → y`
+- …and so on for the optional columns
+
+---
+
+## 6) Troubleshooting
+
+- **“st.session_state has no attribute 'sf_cfg'”**  
+  You’re running an older file. Pull the latest `streamlit_app.py` where session state is initialized **before** rendering the sidebar.
+
+- **Cannot connect to Snowflake**  
+  - Recheck Account format (e.g., `ab12345.eu-central-1`)  
+  - Confirm **Role**, **Warehouse**, **Database**, **Schema** exist and your **User** has access  
+  - Your network may require a VPN or allowlisting Snowflake IPs  
+  - Try a minimal test:
+    ```sql
+    SELECT CURRENT_VERSION();
+    ```
+
+- **Columns not found**  
+  - Make sure your **Table or View** name is correct (Snowflake names are often **UPPERCASE**).  
+  - Use the **🔌 Connect & Load Columns** button again to refresh the column list.  
+  - Ensure the required fields exist (`PAYLOAD_*` columns listed above).
+
+- **Matplotlib/plot errors**  
+  Run:
+  ```bash
+  pip install --upgrade matplotlib numpy pandas
+  ```
+
+- **Streamlit doesn’t open**  
+  - Check the terminal output for the local URL (e.g., http://localhost:8501)  
+  - Try a different port:
+    ```bash
+    streamlit run streamlit_app.py --server.port 8502
+    ```
+
+---
+
+## 7) Developer notes (optional)
+
+- Python ≥ 3.10 recommended  
+- Main entry point: `streamlit_app.py`  
+- All Snowflake queries are built dynamically from UI selections  
+- No database **setup** SQL is run by the app (it assumes your Snowflake objects already exist)
+
+---
+
+## 8) License & Credits
+
+This dashboard uses:
+- **Streamlit** for UI
+- **Pandas/Numpy** for data processing
+- **Matplotlib** for plots
+- An internal **SVG** parser/renderer for layout overlays
+
+---
+
+### Need help?
+
+If you run into any issues, feel free to open an issue with:
+- OS (Windows/macOS/Linux)  
+- Python version (e.g., 3.11)  
+- A screenshot or the exact error text  
+- Whether you’re using **Snowflake** or **CSV** mode
